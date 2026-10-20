@@ -10,7 +10,6 @@ import {
   MapPin,
   Mail,
   Plus,
-  ShieldCheck,
 } from "lucide-react";
 
 const projects = [
@@ -55,11 +54,67 @@ function Logo({ light = false }: { light?: boolean }) {
 
 export default function LandingPage() {
   const [menu, setMenu] = useState(false);
-  const [modal, setModal] = useState<"contact" | "privacy" | number | null>(null);
+  const [modal, setModal] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const header = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    let frame: number | null = null;
+    let scrollPosition = window.scrollY;
+    let ancestor = header.current?.parentElement;
+    while (ancestor) {
+      if (
+        ancestor.scrollHeight > ancestor.clientHeight &&
+        /auto|scroll/.test(getComputedStyle(ancestor).overflowY)
+      ) {
+        scrollPosition = ancestor.scrollTop;
+        break;
+      }
+      ancestor = ancestor.parentElement;
+    }
+    let previousPosition = scrollPosition;
+    let progress = Number(
+      header.current?.style.getPropertyValue("--header-progress") ||
+        Math.min(scrollPosition / 240, 1),
+    );
+    const updateVisibility = () => {
+      const delta = scrollPosition - previousPosition;
+      progress = menu ? 0 : Math.min(Math.max(progress + delta / 240, 0), 1);
+      if (scrollPosition <= 0) progress = 0;
+      const element = header.current;
+      if (element) {
+        element.style.setProperty("--header-progress", String(progress));
+        element.style.setProperty("--header-visibility", String(1 - progress));
+        element.style.transform = `translate3d(0, ${-progress * 100}%, 0)`;
+        element.style.opacity = String(1 - progress);
+        element.style.transition = "none";
+        element.dataset.hidden = String(progress >= 1);
+      }
+      previousPosition = scrollPosition;
+      frame = null;
+    };
+    const onScroll = (event: Event) => {
+      const target = event.target;
+      if (target instanceof HTMLElement) {
+        if (!target.contains(header.current)) return;
+        scrollPosition = target.scrollTop;
+      } else {
+        scrollPosition = window.scrollY;
+      }
+      if (frame === null) frame = window.requestAnimationFrame(updateVisibility);
+    };
+    if (header.current) {
+      header.current.style.removeProperty("--header-opacity");
+    }
+    updateVisibility();
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
+  }, [menu]);
   useEffect(() => {
     if (modal !== null) {
       previousFocus.current = document.activeElement as HTMLElement;
@@ -74,22 +129,49 @@ export default function LandingPage() {
       document.body.style.overflow = "";
     };
   }, [modal]);
+  useEffect(() => {
+    const element = dialog.current;
+    if (!element || modal === null) return;
+    let startedOutside = false;
+    const outside = (event: PointerEvent) => {
+      const bounds = element.getBoundingClientRect();
+      return (
+        event.clientX < bounds.left ||
+        event.clientX > bounds.right ||
+        event.clientY < bounds.top ||
+        event.clientY > bounds.bottom
+      );
+    };
+    const onDown = (event: PointerEvent) => {
+      startedOutside = outside(event);
+    };
+    const onUp = (event: PointerEvent) => {
+      if (startedOutside && outside(event)) setModal(null);
+      startedOutside = false;
+    };
+    element.addEventListener("pointerdown", onDown);
+    element.addEventListener("pointerup", onUp);
+    return () => {
+      element.removeEventListener("pointerdown", onDown);
+      element.removeEventListener("pointerup", onUp);
+    };
+  }, [modal]);
   const jump = () => {
     setMenu(false);
   };
   return (
     <>
-      <header className="header">
-        <div className="header-inner">
+      <header className="forma-navbar" ref={header} style={{ background: "#ffffff" }}>
+        <div className="forma-navbar-inner">
           <Logo />
           <nav aria-label="Navigazione principale">
             <a href="#servizi">Servizi</a>
             <a href="#progetti">Progetti</a>
             <a href="#chi-siamo">Chi siamo</a>
           </nav>
-          <button className="button orange call" onClick={() => setModal("contact")}>
-            <Phone size={15} /> Chiama ora! <ArrowUpRight size={17} />
-          </button>
+          <a className="button orange call" href="#contatti" onClick={jump}>
+            Richiedi un preventivo <ArrowUpRight size={17} />
+          </a>
           <button
             className="menu-toggle"
             aria-label={menu ? "Chiudi menu" : "Apri menu"}
@@ -156,9 +238,6 @@ export default function LandingPage() {
             <a href="#servizi">
               Scopri Forma <ArrowDown size={17} />
             </a>
-            <span className="hero-index">
-              01 <span>/ 04</span>
-            </span>
           </div>
         </section>
         <section id="servizi" className="services section-wrap">
@@ -177,7 +256,6 @@ export default function LandingPage() {
           </div>
           <article className="service-row">
             <div className="service-copy">
-              <span className="service-index">01 / NUOVE COSTRUZIONI</span>
               <h3>
                 Le tue idee.
                 <br />
@@ -219,7 +297,6 @@ export default function LandingPage() {
           </article>
           <article className="service-row reverse">
             <div className="service-copy">
-              <span className="service-index">02 / RISTRUTTURAZIONI</span>
               <h3>
                 Nuova vita,
                 <br />
@@ -283,15 +360,14 @@ export default function LandingPage() {
                 ["250+", "Progetti completati"],
                 ["35", "Professionisti"],
                 ["20+", "Partner qualificati"],
-              ].map(([n, l], i) => (
+              ].map(([n, l]) => (
                 <div className="stat" key={l}>
-                  <span className="stat-index">0{i + 1}</span>
                   <strong>{n}</strong>
                   <span>{l}</span>
                 </div>
               ))}
             </div>
-            <span className="stats-note">Numeri illustrativi per questa landing dimostrativa.</span>
+            <span className="stats-note">Numeri Illustrativi</span>
           </div>
         </section>
         <section id="progetti" className="projects">
@@ -334,10 +410,6 @@ export default function LandingPage() {
               </button>
             ))}
           </div>
-          <div className="project-foot section-wrap">
-            <span>Ogni edificio è una promessa mantenuta.</span>
-            <span>ARCHITETTURA · FUNZIONALITÀ · DURATA</span>
-          </div>
         </section>
         <section id="contatti" className="contact">
           <div className="contact-inner">
@@ -358,10 +430,6 @@ export default function LandingPage() {
                 <br />
                 Raccontacelo. Troviamo insieme la strada giusta.
               </p>
-              <div className="contact-promise">
-                <ShieldCheck size={20} />
-                <span>Preventivo chiaro. Nessun impegno.</span>
-              </div>
             </div>
             <form
               className="quote-form"
@@ -379,7 +447,6 @@ export default function LandingPage() {
               }}
             >
               <h3>Richiedi un preventivo</h3>
-              <p>Lascia i tuoi dati, penseremo noi al resto.</p>
               <label htmlFor="name">Nome e cognome</label>
               <input
                 aria-label="Nome e cognome"
@@ -410,16 +477,7 @@ export default function LandingPage() {
                 <option>Restauro e riqualificazione</option>
                 <option>Altro intervento</option>
               </select>
-              <label className="consent">
-                <input type="checkbox" aria-label="Acconsento al trattamento dei dati" required />
-                <span>
-                  Ho letto l'
-                  <button type="button" onClick={() => setModal("privacy")}>
-                    informativa privacy
-                  </button>{" "}
-                  e acconsento al trattamento dei dati.
-                </span>
-              </label>
+              <p className="demo-notice">Modulo dimostrativo. Non verrà inviato nessun dato</p>
               <button className="button orange submit" type="submit">
                 Richiedi il tuo preventivo <ArrowUpRight size={20} />
               </button>
@@ -428,12 +486,10 @@ export default function LandingPage() {
                 {sent && (
                   <p className="success">
                     <Check size={18} />
-                    Demo completata: i dati sono validi. Nessuna richiesta è stata inviata o
-                    salvata.
+                    Modulo dimostrativo completato. Non verrà inviato nessun dato
                   </p>
                 )}
               </div>
-              <small className="demo-form">Modulo dimostrativo · nessun dato viene inviato</small>
             </form>
           </div>
         </section>
@@ -460,24 +516,20 @@ export default function LandingPage() {
           </div>
           <div>
             <span className="footer-label">PARLIAMONE</span>
-            <button className="footer-contact" onClick={() => setModal("contact")}>
+            <span className="footer-contact">
               <Phone size={16} />
               +39 051 XXX XXXX
-            </button>
+            </span>
             <p>
               <Mail size={16} />
               info@forma.example.com
             </p>
-            <span className="footer-small">Lun – Ven, 8:00 – 18:00 · orari di esempio</span>
+            <span className="footer-small">Contatti dimostrativi</span>
           </div>
-          <a href="#inizio" className="back-top" aria-label="Torna in alto">
-            <ArrowUpRight size={25} />
-          </a>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 Forma Edilizia S.r.l. · P. IVA: dato dimostrativo</span>
-          <span>Azienda, progetti e dati di esempio · fotografie illustrative dal web</span>
-          <button onClick={() => setModal("privacy")}>Privacy policy</button>
+          <span>© 2026 Forma. All rights reserved</span>
+          <span>Progetto dimostrativo</span>
         </div>
       </footer>
       <dialog
@@ -504,46 +556,7 @@ export default function LandingPage() {
               </a>
             </div>
           </>
-        ) : (
-          <div className="modal-content">
-            <div className="eyebrow">
-              <span />
-              {modal === "privacy" ? "TRASPARENZA" : "CONTATTI"}
-            </div>
-            <h2 id="modal-title">
-              {modal === "privacy" ? "La tua privacy." : "Parliamone, con Forma."}
-            </h2>
-            {modal === "privacy" ? (
-              <>
-                <p>
-                  Questa è una landing page dimostrativa. Nome, telefono e tipo di intervento
-                  inseriti nel modulo non vengono trasmessi, salvati in un database o usati per
-                  ricontattarti.
-                </p>
-                <p>
-                  La casella di consenso mostra soltanto il comportamento di un modulo reale. Prima
-                  di pubblicare un sito operativo, inserire un'informativa completa e i riferimenti
-                  del titolare. Le eventuali analisi tecniche della piattaforma sono separate da
-                  questo modulo.
-                </p>
-              </>
-            ) : (
-              <>
-                <p>
-                  Forma è un marchio di esempio: il numero visualizzato è un segnaposto e non avvia
-                  una chiamata reale.
-                </p>
-                <p>
-                  Puoi provare il modulo preventivo: la compilazione avviene solo nel browser, senza
-                  inviare dati.
-                </p>
-                <a className="button orange" href="#contatti" onClick={() => setModal(null)}>
-                  Prova il modulo <ArrowUpRight size={18} />
-                </a>
-              </>
-            )}
-          </div>
-        )}
+        ) : null}
       </dialog>
     </>
   );

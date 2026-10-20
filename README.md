@@ -1,19 +1,62 @@
-# App template
+# Forma — Edilizia & Costruzioni
 
-Runable copies this Bun and Turborepo project into each new sandbox.
+Landing page dimostrativa e moderna per un'impresa generale di costruzioni e ristrutturazioni edilizie.
 
-The root package commands are the external contract:
+## Caratteristiche
 
-- `bun run dev` starts the web app.
-- `bun run dev:desktop` and `bun run dev:mobile` start platform clients.
-- `bun run build` builds every package.
-- `bun run start` starts or restarts the production server.
-- `bun run stop` stops the production server.
-- `bun run lint` and `bun run typecheck` validate the project.
-- The `db:generate`, `db:migrate`, and `db:push` commands manage the database.
+- **Architettura Web SPA:** Costruita con React 19, Vite, TypeScript e Tailwind CSS v4.
+- **Interfaccia reattiva e accessibile:** Navigazione fluida con scroll-linked motion, modale portfolio e form di contatto interattivo lato client.
+- **Pura client-side:** Nessuna dipendenza backend, nessun tracciamento invasivo o framework monolitico.
+- **Asset ottimizzati:** Grafiche vettoriali SVG e immagini moderne WebP precaricate in locale per massime prestazioni.
 
-Deployment tools depend on these command names. Their implementations may change, but the names must remain stable.
+## Requisiti
 
-The web package owns the API, database, and shared web interface. The mobile package is an Expo client. The desktop package is an Electron shell around the web app. Services use the fixed ports defined in `__ports.cjs`, and the web health endpoint is `/api/health`.
+- Node.js 20+ con `npm` (oppure [Bun](https://bun.sh/))
 
-Secrets belong in the root `.env` file. Browser values must use the `VITE_` prefix. Commands prefixed with `internal:` are for template maintenance.
+## Installazione ed Esecuzione
+
+Installare le dipendenze:
+
+```bash
+npm install
+# oppure: bun install
+```
+
+Avviare il server di sviluppo su `http://localhost:5173`:
+
+```bash
+npm run dev
+# oppure: bun run dev
+```
+
+Compilare per la produzione (typecheck + bundle ottimizzato in `dist/`):
+
+```bash
+npm run build
+# oppure: bun run build
+```
+
+Anteprima locale della build di produzione:
+
+```bash
+npm run preview
+# oppure: bun run preview
+```
+
+## Struttura del Progetto
+
+```
+.
+├── public/              # Asset statici (immagini WebP, font Poppins, icone, Open Graph)
+├── src/
+│   ├── components/      # Componenti React (landing page, UI wrapper)
+│   ├── pages/           # Viste e route dell'applicazione
+│   ├── lib/             # Utility (funzioni di stile cn)
+│   ├── app.tsx          # Router principale e layout
+│   ├── main.tsx         # Entrypoint React 19
+│   └── styles.css       # Stili globali e direttive Tailwind CSS
+├── index.html           # Documento HTML principale
+├── vite.config.ts       # Configurazione Vite e Tailwind CSS v4
+├── tsconfig.json        # Configurazione TypeScript
+└── package.json         # Dipendenze e script del progetto
+```

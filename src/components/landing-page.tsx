@@ -60,6 +60,19 @@ export default function LandingPage() {
   const header = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    // Carica iubenda.js dopo che il componente React ha renderizzato i link .iubenda-embed nel DOM
+    const scriptId = "iubenda-embed-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.type = "text/javascript";
+      script.src = "https://cdn.iubenda.com/iubenda.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
   useEffect(() => {
     let frame: number | null = null;
     let scrollPosition = window.scrollY;
@@ -528,8 +541,34 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 Forma. All rights reserved</span>
-          <span>Progetto dimostrativo</span>
+          <div className="footer-bottom-left">
+            <span>© 2026 Forma. All rights reserved</span>
+            <span className="footer-demo-mobile">Progetto dimostrativo</span>
+          </div>
+          <div className="footer-bottom-center">
+            <a
+              href="https://www.iubenda.com/privacy-policy/98511042"
+              className="iubenda-nostyle iubenda-embed footer-link"
+              title="Privacy Policy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Privacy Policy
+            </a>
+            <span className="footer-separator" aria-hidden="true">·</span>
+            <a
+              href="https://www.iubenda.com/privacy-policy/98511042/cookie-policy"
+              className="iubenda-nostyle iubenda-embed footer-link"
+              title="Cookie Policy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Cookie Policy
+            </a>
+          </div>
+          <div className="footer-bottom-right">
+            <span>Progetto dimostrativo</span>
+          </div>
         </div>
       </footer>
       <dialog

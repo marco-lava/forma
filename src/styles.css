@@ -777,11 +777,52 @@ h2 {
   border-top: 1px solid #363e32;
   padding: 22px 7%;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 20px;
   font-size: 8px;
   color: #929a8c;
   line-height: 1.6;
+}
+.footer-bottom-left {
+  flex: 1;
+  text-align: left;
+}
+.footer-demo-mobile {
+  display: none;
+}
+.footer-bottom-center {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.footer-separator {
+  color: #555d51;
+  user-select: none;
+}
+.footer-bottom-right {
+  flex: 1;
+  text-align: right;
+}
+.footer-link,
+a.iubenda-nostyle.footer-link {
+  color: #929a8c !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease;
+  cursor: pointer;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  font-family: inherit !important;
+}
+.footer-link:hover,
+a.iubenda-nostyle.footer-link:hover {
+  color: var(--orange, #f36b2f) !important;
+  text-decoration: underline !important;
 }
 .footer-bottom button {
   background: none;
@@ -1257,15 +1298,44 @@ h2 {
   .footer-bottom {
     padding: 18px 7%;
     font-size: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .footer-bottom-left {
+    flex: 1;
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
-  }
-  .footer-bottom > span:last-child {
     text-align: left;
   }
-  .footer-bottom > span {
-    max-width: clamp(108px, calc(100vw - 230px), 220px);
+  .footer-demo-mobile {
+    display: block;
+    color: #727a6d;
+  }
+  .footer-bottom-center {
+    flex: initial;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-align: right;
+  }
+  .footer-bottom-center .footer-separator {
+    display: none;
+  }
+  .footer-bottom-right {
+    display: none;
+  }
+  .footer-link,
+  a.iubenda-nostyle.footer-link {
+    font-size: 9px !important;
+    padding: 2px 0 !important;
+    white-space: nowrap;
+    text-align: right;
   }
   .modal-content {
     padding: 40px 25px 30px;

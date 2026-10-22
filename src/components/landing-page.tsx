@@ -519,10 +519,11 @@ export default function LandingPage() {
           </div>
           <div>
             <span className="footer-label">DOVE SIAMO</span>
-            <p>
+            <span className="footer-contact">
               <MapPin size={16} />
               Via del Cantiere 12
-              <br />
+            </span>
+            <p>
               40100 Bologna, Italia
             </p>
             <span className="footer-small">Sede e indirizzo dimostrativi</span>
